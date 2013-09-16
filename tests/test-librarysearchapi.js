@@ -15,6 +15,7 @@
 
 var _ = require('underscore');
 var assert = require('assert');
+var express = require('express');
 
 var ConfigTestUtil = require('oae-config/lib/test/util');
 var RestAPI = require('oae-rest');
@@ -32,6 +33,10 @@ describe('LibrarySearchAPI', function() {
     * Initializes the admin REST contexts
     */
     before(function(callback) {
+
+        // Fill up the cam admin rest context
+        camAdminRestContext = TestsUtil.createTenantAdminRestContext(global.oaeTests.tenants.cam.host);
+
         callback();
     });
 
@@ -46,11 +51,11 @@ describe('LibrarySearchAPI', function() {
     });
 
     /**
-     * Test that tests the connection between OAE and Aquabrowser
+     * Test that verifies that no requests can be send to Summon or Aquabrowser when LibrarySearch is disabled for tenant
      */
-    it('verify connection with Aquabrowser API', function(callback) {
+    it('verify LibrarySearch integration enabled', function(callback) {
 
-        // First enable LRS since the default value is false
+        // Disable LibrarySearch for the tenant
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', false, function(err) {
             assert.ok(!err);
             callback();
@@ -58,11 +63,35 @@ describe('LibrarySearchAPI', function() {
     });
 
     /**
-     * Test that tests the connection between OAE and Summon
+     * Test that verifies that no requests can be send when all the external API's are disabled for LibrarySearch
+     */
+    it('verify external API integration', function(callback) {
+
+        // First enable LibrarySearch since the default value is false
+        ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', true, function(err) {
+            assert.ok(!err);
+            callback();
+        });
+    });    
+
+    /**
+     * Test that verifies the connection between OAE and Aquabrowser API
+     */
+    it('verify connection with Aquabrowser API', function(callback) {
+
+        // First enable LibrarySearch since the default value is false
+        ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', true, function(err) {
+            assert.ok(!err);
+            callback();
+        });
+    });
+
+    /**
+     * Test that verifies the connection between OAE and Summon API
      */
     it('verify connection with Summon API', function(callback) {
 
-        // First enable LRS since the default value is false
+        // First enable LibrarySearch since the default value is false
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', false, function(err) {
             assert.ok(!err);
             callback();
