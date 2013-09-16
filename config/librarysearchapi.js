@@ -28,6 +28,8 @@ module.exports = {
         'name': 'Aquabrowser API',
         'description': 'Aquabrowser API configuration',
         'elements': {
+            'enabled': new Fields.Bool('Include Aquabrowser results', 'Include Aquabrowser results in LibrarySearch', false, {'suppress': true}),
+            'timeout': new Fields.Text('Request timeout', 'The timeout for the request', 5000, {'suppress': true}),
             'endpoint': new Fields.Text('Aquabrowser API URL', 'The Aquabrowser API endpoint', 'http://search.lib.cam.ac.uk/sru.ashx?', {'suppress': true})
         }
     },
@@ -35,6 +37,8 @@ module.exports = {
         'name': 'Summon API',
         'description': 'Summon API configuration',
         'elements': {
+            'enabled': new Fields.Bool('Include Summon results', 'Include Summon results in LibrarySearch', false, {'suppress': true}),
+            'timeout': new Fields.Text('Request timeout', 'The timeout for the request', 10000, {'suppress': true}),
             'appid': new Fields.Text('Summon API App ID', 'The Summon app ID', 'cam', {'suppress': true}),
             'appsecret': new Fields.Text('Summon API App Secret', 'The Summon app Secret', 'n74nDv98EFz8hE1wVNoq3MgrU66a9r4M', {'suppress': true}),
             'endpoint': new Fields.Text('Summon API URL', 'The Summon API endpoint (without http(s)://)', 'api.summon.serialssolutions.com', {'suppress': true}),
