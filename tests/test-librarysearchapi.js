@@ -22,6 +22,7 @@ var RestAPI = require('oae-rest');
 var RestContext = require('oae-rest/lib/model').RestContext;
 var TestsUtil = require('oae-tests');
 
+var ActivityTestsUtil = require('oae-activity/lib/test/util');
 var LibrarySearchConfig = require('oae-config').config('oae-librarysearch');
 
 describe('LibrarySearchAPI', function() {
@@ -37,16 +38,40 @@ describe('LibrarySearchAPI', function() {
         // Fill up the cam admin rest context
         camAdminRestContext = TestsUtil.createTenantAdminRestContext(global.oaeTests.tenants.cam.host);
 
+        // Create a new express application to mock a LibrarySearch
+        var app = express();
+        app.use(express.bodyParser({}));
+
+        app.post('/', function(req, res) {
+            onRequest(req);
+            res.send(200);
+        });
+
+        // Listen to a specific port
+        var server = app.listen(3000);
+
         callback();
     });
 
     /**
-    * Disables LibrarySearch for the tenant after each test
+    * Disables LibrarySearch, Aquabrowser and Summon for the tenant after each test
     */
     afterEach(function(callback){
+
+        // Disable LibrarySearch for tenant
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', false, function(err) {
             assert.ok(!err);
-            callback();
+
+            // Disable Aquabrowser for tenant
+            ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/aquabrowser/enabled', false, function(err) {
+                assert.ok(!err);
+
+                // Disable Summon for tenant
+                ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/summon/enabled', false, function(err) {
+                    assert.ok(!err);
+                    callback();
+                });
+            });
         });
     });
 
@@ -58,19 +83,49 @@ describe('LibrarySearchAPI', function() {
         // Disable LibrarySearch for the tenant
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', false, function(err) {
             assert.ok(!err);
-            callback();
+
+            // Generate a test user
+            TestsUtil.generateTestUsers(camAdminRestContext, 1, function(err, users) {
+                assert.ok(!err);
+
+                _.each(users, function(user, id) {
+                    var userCtx = user.restContext;
+
+                    onRequest = function(req) {
+
+                    };
+
+                    // Perform a search to the LibrarySearch API
+                    callback();
+                });
+            });
         });
     });
 
     /**
      * Test that verifies that no requests can be send when all the external API's are disabled for LibrarySearch
      */
-    it('verify external API integration', function(callback) {
+    it('verify external API integration enabled', function(callback) {
 
         // First enable LibrarySearch since the default value is false
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', true, function(err) {
             assert.ok(!err);
-            callback();
+
+            // Generate a test user
+            TestsUtil.generateTestUsers(camAdminRestContext, 1, function(err, users) {
+                assert.ok(!err);
+
+                _.each(users, function(user, id) {
+                    var userCtx = user.restContext;
+
+                    onRequest = function(req) {
+
+                    };
+
+                    // Perform a search to the LibrarySearch API
+                    callback();
+                });
+            });
         });
     });    
 
@@ -82,7 +137,27 @@ describe('LibrarySearchAPI', function() {
         // First enable LibrarySearch since the default value is false
         ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', true, function(err) {
             assert.ok(!err);
-            callback();
+
+            // Enable Aquabrowser for the tenant
+            ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/aquabrowser/enabled', true, function(err) {
+                assert.ok(!err);
+
+                // Generate a test user
+                TestsUtil.generateTestUsers(camAdminRestContext, 1, function(err, users) {
+                    assert.ok(!err);
+
+                    _.each(users, function(user, id) {
+                        var userCtx = user.restContext;
+
+                        onRequest = function(req) {
+
+                        };
+
+                        // Perform a search to the LibrarySearch API
+                        callback();
+                    });
+                });
+            });
         });
     });
 
@@ -92,9 +167,28 @@ describe('LibrarySearchAPI', function() {
     it('verify connection with Summon API', function(callback) {
 
         // First enable LibrarySearch since the default value is false
-        ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', false, function(err) {
+        ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/librarysearch/enabled', true, function(err) {
             assert.ok(!err);
-            callback();
+
+            // Enable Summon for the tenant
+            ConfigTestUtil.updateConfigAndWait(camAdminRestContext, null, 'oae-librarysearch/summon/enabled', true, function(err) {
+                assert.ok(!err);
+
+                // Generate a test user
+                TestsUtil.generateTestUsers(camAdminRestContext, 1, function(err, users) {
+
+                    _.each(users, function(user, id) {
+                        var userCtx = user.restContext;
+
+                        onRequest = function(req) {
+
+                        };
+
+                        // Perform a search to the LibrarySearch API
+                        callback();
+                    });
+                });
+            });
         });
     });
 });
